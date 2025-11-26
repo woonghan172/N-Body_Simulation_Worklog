@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./serial_version ./tests/correctness/testin_mass_0.txt ./tests/correctness/testin_coordinate_0.txt acceleration_0.txt 
+./serial_version ./tests/correctness/testin0_mass.txt ./tests/correctness/testin0_coordinate.txt acceleration_0.txt 
