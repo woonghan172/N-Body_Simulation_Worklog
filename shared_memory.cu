@@ -153,6 +153,10 @@ __global__ void compute_forces_kernel(const float4 *posMass, float4 *accOut, int
         if (j < N) {
             shPos[tid] = posMass[j];
         }
+        // avoid the previous tile's data being used
+        else {
+            shPos[tid] = make_float4(0,0,0,0);
+        }
         __syncthreads();
 
         int tileSize = min(blockDim.x, N - tile * blockDim.x);
