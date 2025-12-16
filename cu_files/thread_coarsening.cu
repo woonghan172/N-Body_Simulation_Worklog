@@ -244,6 +244,9 @@ int main(int argc, char *argv[]){
     coarseningKernel<<<grid, block>>>(N, COARSENING_FACTOR, TILE_SIZE, THREAD_PER_BLOCK*num_blocks, device_coord_mass, device_accel);
     CHECK_CUDA(cudaDeviceSynchronize());
 
+    //Write Memory Back to Host
+    CHECK_CUDA(cudaMemcpy(accel, device_accel, (size_t)N * 4  * sizeof(float), cudaMemcpyDeviceToHost));
+
     clock_gettime(CLOCK_MONOTONIC, &end);
     // --------------------------
 
@@ -252,9 +255,6 @@ int main(int argc, char *argv[]){
         (end.tv_nsec - start.tv_nsec) / 1e9;
 
     printf("Computation time: %.6f seconds\n", elapsed);
-
-    //Write Memory Back to Host
-    CHECK_CUDA(cudaMemcpy(accel, device_accel, (size_t)N * 4  * sizeof(float), cudaMemcpyDeviceToHost));
 
     //Write Results
     write_outputs(output_file, N, accel);
