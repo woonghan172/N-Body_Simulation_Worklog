@@ -144,7 +144,7 @@ coarseningKernel(int N, int C_factor, int Tile_size, int total_threads, float *d
 
     //Error Condition
     if (Tile_size%blockDim.x != 0){
-        printf("Incorrect Tile Dimension");
+        printf("Incorrect Tile Dimension\n");
         return;
     }
 
@@ -232,8 +232,8 @@ int main(int argc, char *argv[]){
 
     //Run the Kernel
     int num_blocks = ((N-1)/(THREAD_PER_BLOCK*COARSENING_FACTOR))+1;
-    dim3 grid(THREAD_PER_BLOCK);
-    dim3 block(num_blocks);
+    dim3 grid(num_blocks);
+    dim3 block(THREAD_PER_BLOCK);
 
     // --------------------------
     // Timing starts here
