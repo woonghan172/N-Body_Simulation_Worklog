@@ -5,10 +5,11 @@ set -euo pipefail
 if [ $# -lt 2 ] || [ $# -gt 2 ]; then
     echo "Usage: $0 [strategy] [test-case-number]"
     echo "Strategies:"
-    echo "  0 : serial"
-    echo "  1 : shared memory"
-    echo "  2 : thread coasening"
-    echo "  3 : optimal"
+    echo "  0: serial"
+    echo "  1: shared memory"
+    echo "  2: thread coasening"
+    echo "  3: optimal"
+    echo "  4: hierarchical"
     exit 1
 fi
 
@@ -36,6 +37,10 @@ case $STRATEGY in
     3)
         EXEC="./build/optimal"
         STRATEGY_NAME="optimal"
+        ;;
+    4)
+        EXEC="./build/hierarchical"
+        STRATEGY_NAME="hierarchical"
         ;;
     *)
         echo "[ERROR] Invalid strategy: $STRATEGY"

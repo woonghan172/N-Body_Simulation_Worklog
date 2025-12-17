@@ -242,14 +242,14 @@ int main(int argc, char *argv[]) {
     Vec3 *pos = NULL;
 
     int N = read_inputs(mass_file, coord_file, &mass, &pos);
-    printf("Loaded %d bodies.\n", N);
+    //printf("Loaded %d bodies.\n", N);
 
     int *cluster_offsets = NULL;
     int *cluster_sizes = NULL;
     int cluster_count = 0;
     build_clusters_fixed(N, bodies_per_cluster,
                          &cluster_offsets, &cluster_sizes, &cluster_count);
-    printf("Configured %d clusters of %d bodies each.\n", cluster_count, bodies_per_cluster);
+    //printf("Configured %d clusters of %d bodies each.\n", cluster_count, bodies_per_cluster);
     float4 *h_posMass = (float4 *)malloc(sizeof(float4) * N);
     float4 *h_acc4 = (float4 *)malloc(sizeof(float4) * N);
     if (!h_posMass || !h_acc4) {
