@@ -39,6 +39,11 @@ case $STRATEGY in
         EXEC="./build/optimal"
         STRATEGY_NAME="optimal"
         ;;
+
+    4)
+        EXEC="./build/hierarchical"
+        STRATEGY_NAME="hierarchical"
+        ;;
     *)
         echo "[ERROR] Invalid strategy: $STRATEGY"
         exit 1
