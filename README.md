@@ -45,6 +45,12 @@ All experiments were conducted on the University of Minnesota CUDA server with t
 
 ## Build and Run
 
+TL;DR: 
+```bash
+./build.sh
+python3 run_test.py
+```
+
 ### 1. Build the Executables
 
 A general-purpose build script compiles all main strategies (0, 1, 2, 4) into the `build/` directory.
@@ -59,6 +65,8 @@ For hyperparameter tuning (Strategy 3), use the `tuning_build.sh` script, which 
 ```
 
 ### 2. Run Tests
+
+We recommend running the full testing suite ()
 
 #### Run a Single Test Case
 Use the `test_one.sh` script to run a specific strategy on a single test case.
