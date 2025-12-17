@@ -8,6 +8,8 @@ PERFORMANCE_SH = "performance_test.sh"
 LABEL_WIDTH = 25
 NUM_WIDTH   = 10
 
+SERIAL_TIME100K = 216.23
+
 strategy_name = {
     0: "serial",
     1: "shared_memory",
@@ -50,6 +52,7 @@ if len(sys.argv)==1 or sys.argv[1]=="1":
 
 if len(sys.argv)==1 or sys.argv[1]=="2":
     print("\n[ Start performance test ]")
+    print(f"Baseline Serial Time (100,000 bodies) = {SERIAL_TIME100K:.2f} seconds")
 
     # test case
     for j in range(0,4): # TO DO: Change the range when test cases are done.
@@ -71,7 +74,10 @@ if len(sys.argv)==1 or sys.argv[1]=="2":
             match = re.search(r"Computation time:\s*([0-9.]+)\s*seconds", res.stdout)
             if match:
                 comp_time = float(match.group(1))
-                print(f"    {strategy_name[i]:<{LABEL_WIDTH}}{comp_time:{NUM_WIDTH}.5f} seconds")
+                if (j==0):
+                    print(f"    {strategy_name[i]:<{LABEL_WIDTH}}{comp_time:{NUM_WIDTH}.5f} seconds ({SERIAL_TIME100K/comp_time:.0f}x faster than serial)")
+                else:
+                    print(f"    {strategy_name[i]:<{LABEL_WIDTH}}{comp_time:{NUM_WIDTH}.5f} seconds")
             else:
                 print("    " + strategy_name[i] + ": Computation time not found in output")
 
