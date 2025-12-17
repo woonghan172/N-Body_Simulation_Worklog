@@ -6,7 +6,7 @@
 #include <cuda_runtime.h>
 
 
-#define COARSENING_FACTOR 4
+#define COARSENING_FACTOR 2
 #define THREAD_PER_BLOCK 64
 
 #define EPS2 1e-9f   // softening factor
