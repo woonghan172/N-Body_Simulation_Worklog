@@ -26,7 +26,7 @@ This project implements and evaluates multiple CPU and GPU versions of an N-body
 ### Dependencies
 - **CUDA Toolkit:** Version 12.0 or newer
 - **Python:** Version 3.8 or newer
-- **NumPy:** Required for test and data generation scripts.
+- **NumPy:** Required ONLY if generating new test data
 
 You can install Python dependencies using pip:
 ```bash
