@@ -107,10 +107,12 @@ bodyBodyInteraction(float4 bi, float4 bj, float4 ai)
   // distSqr = dot(r_ij, r_ij) + EPS^2  [6 FLOPS]
    float distSqr = r.x * r.x + r.y * r.y + r.z * r.z + EPS2;
   // invDistCube =1/distSqr^(3/2)  [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
-   float distSixth = distSqr * distSqr * distSqr;
-  float invDistCube = 1.0f/sqrtf(distSixth);
+//    float distSixth = distSqr * distSqr * distSqr;
+//   float invDistCube = 1.0f/sqrtf(distSixth);
+  float invDist  = rsqrtf(distSqr);
+  float invDist3 = invDist * invDist * invDist;
   // s = m_j * invDistCube [1 FLOP]
-   float s = bj.w * invDistCube;
+   float s = bj.w * invDist3;
   // a_i =  a_i + s * r_ij [6 FLOPS]
   ai.x += r.x * s;
   ai.y += r.y * s;
