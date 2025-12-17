@@ -1,53 +1,119 @@
-# Project Description
-In this project, we implement the N-Bodies Simulation.
-Our separate implementations is
-* Serial version
-* GPU Gems version
-* Thread Coarsening
-* Hyperparameter tuning (change block size, coarsening factor, etc.)
-* Hierarchical n-body simulation
+# N-Body Simulation: Performance and Parallelization Study
 
-### Group members
- - Po-Tsun Yu
- - Alexander Kachan
- - Allen Liao
- - Nicholas Drew
- - Will Han
+This project implements and evaluates multiple CPU and GPU versions of an N-body simulation. We explore various parallelization and optimization strategies to analyze their correctness, performance, and trade-offs on modern GPU architectures.
 
-## How to Build and Run the Code
-### Build
-clone this repository to a folder with a CUDA enabled GPU (via git or vscode)
-then, in terminal:
+**Group Members:**
+- Po-Tsun Yu
+- Alexander Kachan
+- Allen Liao
+- Nicholas Drew
+- Will Han
+
+---
+
+## Implemented Strategies
+
+| Strategy | Description | Main Files / Related Scripts |
+| --- | --- | --- |
+| 0. Serial | CPU baseline used for correctness checks | `cu_files/serial.cu` |
+| 1. Shared Memory | GPU kernel using a tiled shared-memory approach inspired by GPU Gems | `cu_files/shared_memory.cu` |
+| 2. Thread Coarsening | Each thread processes multiple bodies to reduce global memory traffic | `cu_files/thread_coarsening.cu` |
+| 3. Hyperparameter Tuning | Searches block size and coarsening factor combinations | `cu_files/optimal.cu`, `tuning_build.sh` |
+| 4. Hierarchical N-Body | Cluster-based blocking evaluated on spatially localized datasets (no force approximation) | `hierarchical_dataset.py`, `cu_files/hierarchical.cu` |
+
+## Environment & Setup
+
+### Dependencies
+- **CUDA Toolkit:** Version 12.0 or newer
+- **Python:** Version 3.8 or newer
+- **NumPy:** Required for test and data generation scripts.
+
+You can install Python dependencies using pip:
+```bash
+pip install numpy
+```
+
+### Environment
+All experiments were conducted on the University of Minnesota CUDA server with the following specifications:
+- **GPU:** NVIDIA Tesla T4 (15,360 MiB)
+- **CUDA Toolkit:** 13.0
+- **Driver Version:** 580.105.08
+- **CPU:** Intel Xeon Gold 6148 @ 2.40 GHz (40 physical cores / 80 logical cores)
+- **Platform:** Single-GPU compute node
+
+---
+
+## Build and Run
+
+### 1. Build the Executables
+
+A general-purpose build script compiles all main strategies (0, 1, 2, 4) into the `build/` directory.
+
+```bash
 ./build.sh
+```
 
-### Run
-in terminal:    
-./test_one.sh [strategy] [test case num] [output file name (optional)]  
-ex) ./test_one.sh 1 0 output.txt  
-ex) ./test_one.sh 1 0  => default output file will be as ./results/[strategy_name]_test[test_num].txt
+For hyperparameter tuning (Strategy 3), use the `tuning_build.sh` script, which compiles specialized kernels into the `build_test/` directory.
+```bash
+./tuning_build.sh
+```
 
-* strategies  
-0: serial  
-1: shared memory  
-2: thread coarsening
+### 2. Run Tests
 
-## How to Run Correctness Tests
-e.g., in terminal:
-python3 ./run_test.py 1
+#### Run a Single Test Case
+Use the `test_one.sh` script to run a specific strategy on a single test case.
 
-* How to run a single correctness test  
-./correctness_test.sh [strategy] [test case num]
-ex) ./correctness_test.sh 2 0
+The `strategy_id`s supported by this script are:
+- **0:** Serial
+- **1:** Shared Memory
+- **2:** Thread Coarsening
+- **3:** Hyperparameter Tuning
+- **4:** Hierarchical N-Body
 
-* strategies  
-0: serial  
-1: shared memory  
-2: thread coarsening
+**Syntax:**
+```bash
+./test_one.sh [strategy_id] [test_case_num] [output_file_name (optional)]
+```
 
-## How to Run Performance Tests and Reproduce Results
-python3 ./run_test.py 2
+**Examples:**
+```bash
+./test_one.sh 1 0 # Run Strategy 1 (Shared Memory) on test case 0 and save to a default results file
 
-## How to Run Correctness + Performance Test
-python3 ./run_test.py
+./test_one.sh 2 5 my_output.txt # Run Strategy 2 (Thread Coarsening) on test case 5 and save to my_output.txt
+```
+> Default output is saved to `results/[strategy_name]_test[test_num].txt`.
 
-## Dependencies and Environment Setup
+#### Run Automated Test Suites
+The `run_test.py` script provides an easy way to run comprehensive correctness and performance tests.
+
+- **Run Correctness & Performance Tests:**
+  ```bash
+  python3 run_test.py
+  ```
+
+- **Run Only Correctness Tests:**
+  Compares GPU outputs against the serial baseline for all strategies.
+  ```bash
+  python3 run_test.py 1
+  ```
+
+- **Run Only Performance Tests:**
+  Measures and reports the speedup of parallel strategies.
+  ```bash
+  python3 run_test.py 2
+  ```
+
+### 3. Hierarchical Simulation (Strategy 4)
+
+This strategy requires a dataset with cluster information.
+1.  **Generate the dataset:**
+    ```bash
+    python3 hierarchical_dataset.py
+    ```
+    This creates `mass.txt`, `coord.txt`, and `cluster_id.txt` in the root directory.
+
+2.  **Run the simulation:**
+    Use `test_one.sh` with strategy ID 4. You must use test case 0, as the script is not configured to read other file names.
+    ```bash
+    ./test_one.sh 4 0
+    ```
