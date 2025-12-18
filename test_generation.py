@@ -2,18 +2,18 @@ import numpy as np
 # This script takes input parameters to generate correctness test
 
 #File Locations
-coordfile = "./tests/speedup/s_testin2_coordinate.txt"
-massfile = "./tests/speedup/s_testin2_mass.txt"
-# output_file = "./tests/speedup/s_testout0.txt"
+coordfile = "./tests/speedup/s_testin9_coordinate.txt"
+massfile = "./tests/speedup/s_testin9_mass.txt"
+# output_file = "./tests/correctness/testout23.txt"
 
 #Test Parameters
-num_of_bodies = 1000000
+num_of_bodies = 900000
 
 mass_max = 10
 mass_min = 0
 
-position_max = 100
-position_min = -100
+position_max = 1000
+position_min = -1000
 
 eps =  1e-9
 
@@ -23,7 +23,7 @@ rng = np.random.default_rng()
 positions_array = rng.uniform(low=position_min, high=position_max, size=(num_of_bodies, 3))
 mass_array = rng.uniform(low=mass_min, high=mass_max, size=(num_of_bodies, 1))
 
-#Generate Output
+# #Generate Output
 # accel_array = []
 # for i, posi in enumerate(positions_array):
 #     accel = np.array([0, 0, 0], dtype=float)
