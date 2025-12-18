@@ -15,7 +15,8 @@ N = num_clusters * bodies_per_cluster
 # ----------------------------
 # Allocate arrays
 # ----------------------------
-mass = np.ones(N, dtype=np.float32)
+# mass = np.ones(N, dtype=np.float32)
+mass = np.random.uniform(low=0.1, high=1.0, size=N)
 coords = np.zeros((N, 3), dtype=np.float32)
 cluster_id = np.zeros(N, dtype=np.int32)
 

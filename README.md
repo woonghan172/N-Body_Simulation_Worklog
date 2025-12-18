@@ -123,7 +123,7 @@ The `run_test.py` script provides an easy way to run comprehensive correctness a
 ### 3. Hierarchical Simulation (Strategy 4)
 
 This strategy requires a dataset with cluster information.
-1.  **Generate the dataset:**
+1.  **Generate the dataset:(optional)** 
     ```bash
     python3 hierarchical_dataset.py
     ```
