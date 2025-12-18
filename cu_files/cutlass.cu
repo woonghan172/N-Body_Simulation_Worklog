@@ -145,7 +145,7 @@ __global__ void accumulate_tile_sharedJ(
 {
   extern __shared__ float4 shPj[]; // curJB entries: {x,y,z,mass}
 
-  // Cooperative load of the j-tile into shared memory
+  // Cooperative load of j-tile into shared memory
   for (int tj = threadIdx.x; tj < curJB; tj += blockDim.x) {
     int j = j0 + tj;
     if (j < N) {
@@ -160,7 +160,6 @@ __global__ void accumulate_tile_sharedJ(
   }
   __syncthreads();
 
-  // Each thread computes one i within this i-tile
   int ti = blockIdx.x * blockDim.x + threadIdx.x;
   if (ti >= curIB) return;
 
@@ -174,35 +173,69 @@ __global__ void accumulate_tile_sharedJ(
   float ax = 0.f, ay = 0.f, az = 0.f;
   float ni = norm2[i];
 
-  // Loop over j in this tile (using shared memory for x,y,z,mass)
+  // Heuristic thresholds (tunable)
+  // If dist2 from dot-formula is tiny relative to position magnitudes,
+  // it is likely suffering cancellation -> fallback.
+  const float REL_EPS = 1e-6f;     // relative guard vs (|pi|^2 + |pj|^2)
+  const float ABS_EPS = 1e-18f;    // absolute guard (helps when ni,nj near 0)
+
   for (int tj = 0; tj < curJB; tj++) {
     int j = j0 + tj;
     if (j >= N) break;
     if (i == j) continue;
 
-    float4 pj = shPj[tj];  // {xj,yj,zj,massj}
+    float nj  = norm2[j];
+    float dot = dotTile[ti * ldc + tj];
 
-    double dx = (double)pj.x - (double)xi;
-    double dy = (double)pj.y - (double)yi;
-    double dz = (double)pj.z - (double)zi;
+    // dist2 via identity using CUTLASS dot
+    float dist2_dot = ni + nj - 2.0f * dot + EPS2;
 
-    // stable distance^2 in double
-    double dist2d = dx*dx + dy*dy + dz*dz + (double)EPS2;
+    // Build a scale for "how big are the terms we are subtracting?"
+    // If dist2_dot is extremely small compared to this, cancellation is likely.
+    float scale = ni + nj + 1.0f;  // +1 prevents scale=0
+    bool unsafe =
+        (!isfinite(dist2_dot)) ||
+        (dist2_dot <= 0.0f) ||
+        (dist2_dot < REL_EPS * scale) ||
+        (dist2_dot < ABS_EPS);
 
-    // (optional safety clamp if any NaN/negative ever appears)
-    if (dist2d < (double)EPS2) dist2d = (double)EPS2;
+    float dist2;
 
-    double invDist  = 1.0 / sqrt(dist2d);
-    double invDist3 = invDist * invDist * invDist;
+    if (!unsafe) {
+      // Fast path: keep using CUTLASS dot result
+      dist2 = dist2_dot;
+    } else {
+      // Fallback: compute distance from coordinate differences in double
+      // (more stable for far-from-origin but close points).
+      float4 pj = shPj[tj];
 
-    double s = (double)pj.w * invDist3;
+      double dx = (double)pj.x - (double)xi;
+      double dy = (double)pj.y - (double)yi;
+      double dz = (double)pj.z - (double)zi;
 
-    ax += (float)(dx * s);
-    ay += (float)(dy * s);
-    az += (float)(dz * s);
+      double dist2d = dx*dx + dy*dy + dz*dz + (double)EPS2;
+
+      // Clamp to avoid sqrt of negative / denorm weirdness
+      if (dist2d < (double)EPS2) dist2d = (double)EPS2;
+
+      dist2 = (float)dist2d;
+    }
+
+    float invDist  = 1.0f / sqrtf(dist2);
+    float invDist3 = invDist * invDist * invDist;
+
+    float4 pj = shPj[tj];               // {xj,yj,zj,massj}
+    float s = pj.w * invDist3;
+
+    float rx = pj.x - xi;
+    float ry = pj.y - yi;
+    float rz = pj.z - zi;
+
+    ax += rx * s;
+    ay += ry * s;
+    az += rz * s;
   }
 
-  // Accumulate into global (safe: i-tile rows are disjoint across blocks)
   acc[i].x += ax;
   acc[i].y += ay;
   acc[i].z += az;
