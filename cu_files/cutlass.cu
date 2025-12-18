@@ -180,26 +180,26 @@ __global__ void accumulate_tile_sharedJ(
     if (j >= N) break;
     if (i == j) continue;
 
-    // Dot product from CUTLASS result (stride = ldc)
-    float dot = dotTile[ti * ldc + tj];
+    float4 pj = shPj[tj];  // {xj,yj,zj,massj}
 
-    // dist^2 = ||pi||^2 + ||pj||^2 - 2*pi·pj + EPS2
-    float dist2 = ni + norm2[j] - 2.0f * dot + EPS2;
+    double dx = (double)pj.x - (double)xi;
+    double dy = (double)pj.y - (double)yi;
+    double dz = (double)pj.z - (double)zi;
 
-    // Match serial reference for strict correctness
-    float invDist  = 1.0f / sqrtf(dist2);
-    float invDist3 = invDist * invDist * invDist;
+    // stable distance^2 in double
+    double dist2d = dx*dx + dy*dy + dz*dz + (double)EPS2;
 
-    float4 pj = shPj[tj];         // {xj,yj,zj,massj}
-    float s = pj.w * invDist3;    // mass[j] * invDist^3 (G=1)
+    // (optional safety clamp if any NaN/negative ever appears)
+    if (dist2d < (double)EPS2) dist2d = (double)EPS2;
 
-    float rx = pj.x - xi;
-    float ry = pj.y - yi;
-    float rz = pj.z - zi;
+    double invDist  = 1.0 / sqrt(dist2d);
+    double invDist3 = invDist * invDist * invDist;
 
-    ax += rx * s;
-    ay += ry * s;
-    az += rz * s;
+    double s = (double)pj.w * invDist3;
+
+    ax += (float)(dx * s);
+    ay += (float)(dy * s);
+    az += (float)(dz * s);
   }
 
   // Accumulate into global (safe: i-tile rows are disjoint across blocks)

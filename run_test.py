@@ -33,11 +33,13 @@ if len(sys.argv)==1 or sys.argv[1]=="1":
     for i in range(6):
         print("  Testing " + strategy_name[i])
         # test case
-        for j in range(8): # TO DO: Change the range when test cases are done.
+        for j in range(26): # TO DO: Change the range when test cases are done.
+
             if i!=4 and j==7:
                 continue
             if i==4 and j!=7:
                 continue
+
             res = subprocess.run(
                 ["bash", CORRECTNESS_SH, str(i), str(j)],
                 capture_output=True,

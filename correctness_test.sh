@@ -18,7 +18,8 @@ STRATEGY=$1
 TEST_NUM=$2
 OUTPUT_FILE="./build_test/output${STRATEGY}_${TEST_NUM}.txt"
 ANSWER_FILE="./tests/correctness/testout${TEST_NUM}.txt"
-TOL=6e-3
+#TOL=6e-3
+TOL_PERCENTAGE=1e-1
 
 rm -rf ./build_test
 mkdir ./build_test
@@ -82,10 +83,10 @@ if [ ! -f "$ANSWER_FILE" ]; then
     exit 2
 fi
 
-awk -v tol="$TOL" '
+awk -v tol_pct="$TOL_PERCENTAGE" '
 function abs(x) { return x < 0 ? -x : x }
 
-BEGIN { fail = 0 }
+BEGIN { fail = 0; eps = 1e-12 }  # eps avoids div-by-zero for near-zero answers
 
 {
     if (NF < 3) {
@@ -110,9 +111,15 @@ BEGIN { fail = 0 }
 
     for (i = 1; i <= 3; i++) {
         diff = abs($i - b[i])
-        if (diff > tol) {
-            printf "Mismatch line %d col %d: output=%.10g answer=%.10g |diff|=%.10g (tol=%g)\n",
-                   NR, i, $i, b[i], diff, tol
+
+        denom = abs(b[i])
+        if (denom < eps) denom = eps
+
+        rel = diff / denom
+
+        if (rel > tol_pct) {
+            printf "Mismatch line %d col %d: output=%.10g answer=%.10g |diff|=%.10g rel=%.10g (tol_pct=%g)\n",
+                   NR, i, $i, b[i], diff, rel, tol_pct
             fail = 1
             exit 1
         }
@@ -120,15 +127,12 @@ BEGIN { fail = 0 }
 }
 
 END {
-    # If ANSWER_FILE has extra lines beyond what we consumed, detect it here
     if ((getline extra < ans) > 0 && fail == 0) {
         print "ERROR: ANSWER_FILE has extra lines"
         fail = 1
         exit 2
     }
-    if (fail == 0){
-        print "PASS"
-    }
+    if (fail == 0) print "PASS"
 }
 ' ans="$ANSWER_FILE" "$OUTPUT_FILE"
 

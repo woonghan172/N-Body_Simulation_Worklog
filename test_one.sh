@@ -6,11 +6,12 @@ set -e
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
     echo "Usage: $0 [strategy] [test-case-number] [optional-output-file]"
     echo "Strategies:"
-    echo "  0 : serial"
-    echo "  1 : shared_memory"
-    echo "  2 : thread_coarsening"
-    echo "  3 : optimal"
-    echo "  4 : hierarchical"
+    echo "  0: serial"
+    echo "  1: shared_memory"
+    echo "  2: thread_coarsening"
+    echo "  3: optimal"
+    echo "  4: hierarchical"
+    echo "  5: cutlass"
     exit 1
 fi
 
@@ -39,6 +40,10 @@ case $STRATEGY in
     4)
         EXEC="./build/hierarchical"
         STRATEGY_NAME="hierarchical"
+        ;;
+    5)
+        EXEC="./build/cutlass"
+        STRATEGY_NAME="cutlass"
         ;;
     *)
         echo "[ERROR] Invalid strategy: $STRATEGY"
