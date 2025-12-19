@@ -24,6 +24,12 @@ bodies_for_speedup = {
     1: "500,000",
     2: "1,000,000",
     3: "2,560,000",
+    4: "400,000",
+    5: "550,000",
+    6: "600,000",
+    7: "700,000",
+    8: "800,000",
+    9: "900,000",
 }
 
 if len(sys.argv)==1 or sys.argv[1]=="1":
@@ -58,7 +64,7 @@ if len(sys.argv)==1 or sys.argv[1]=="2":
     print(f"Baseline Serial Time (100,000 bodies) = {SERIAL_TIME100K:.2f} seconds")
 
     # test case
-    for j in range(0,4): # TO DO: Change the range when test cases are done.
+    for j in range(0,10): # TO DO: Change the range when test cases are done.
         print(f"Speed Up Test Case {j} ("+ bodies_for_speedup[j] +" bodies)")
         # strategy
         # Shows the speed of serial specifically on the N=100,000 case.
@@ -66,9 +72,9 @@ if len(sys.argv)==1 or sys.argv[1]=="2":
         # if (j==0):
         #     bottom=0
         for i in range(bottom, 6):
-            if i==4 and j != 3:
+            if i==4 and j != 3: # hierarchical method case
                  continue
-            if i==5 and j != 0:
+            if i==5 and j != 0: # for cutlass-based version, only test case 0
                  continue
             res = subprocess.run(
                 ["bash", PERFORMANCE_SH, str(i), str(j)],
