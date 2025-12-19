@@ -122,7 +122,7 @@ The `run_test.py` script provides an easy way to run comprehensive correctness a
 
 ### 3. Creating test case for Hierarchical Simulation (Optional)
 
-As current impplemented hierarchical method requires customized dataset, we used this python script to generate one.
+As current implemented hierarchical method requires a customized dataset, we used this python script to generate one.
 1.  **Generate the dataset**
     ```bash
     python3 hierarchical_dataset.py
@@ -130,7 +130,7 @@ As current impplemented hierarchical method requires customized dataset, we used
     This creates `mass.txt`, `coord.txt`, and `cluster_id.txt` in project root directory.
 
 2.  **Run the simulation:**
-    You can use `test_one.sh` with strategy ID 4 to test the generated test case. Copy and paste the mass/coordinate information to tests for directory following name format of other files in there (testinxx_mass.txt and testinxx_coordinate.txt).
+    You can use `test_one.sh` with strategy ID 4 to test the generated test case. Copy and paste the generated mass & coordinate information to './tests' directory following name format of other files in there (testinxx_mass.txt and testinxx_coordinate.txt).
     ```bash
     ./test_one.sh 4 123
     ```
